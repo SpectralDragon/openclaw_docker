@@ -48,6 +48,35 @@ You can override the ports with `MOLTBOT_GATEWAY_PORT` and `MOLTBOT_BRIDGE_PORT`
 
 Data persists in `./data/moltbot-config` and `./data/moltbot-workspace` by default.
 
+## Helm (Kubernetes)
+
+Install the chart and configure the gateway token (either via an existing Secret or via a value):
+
+```bash
+helm install moltbot ./moltbot-chart \
+  --set gateway.tokenSecret.value="<token>"
+```
+
+To reuse an existing Secret instead of embedding the token in values:
+
+```bash
+helm install moltbot ./moltbot-chart \
+  --set gateway.tokenSecret.existingSecret="moltbot-gateway-token" \
+  --set gateway.tokenSecret.key="CLAWDBOT_GATEWAY_TOKEN"
+```
+
+Once the pod is running, execute the one-time setup inside the container:
+
+```bash
+kubectl exec -it deploy/moltbot -- clawdbot setup
+```
+
+To access the UI locally, port-forward the gateway service port:
+
+```bash
+kubectl port-forward svc/moltbot 8080:18789
+```
+
 ## Notes
 
 - If you use the Dockerfile build, the gateway binds to `lan` by default. The Docker Compose file binds to `loopback`.
