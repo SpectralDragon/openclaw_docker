@@ -52,3 +52,44 @@ Data persists in `./data/moltbot-config` and `./data/moltbot-workspace` by defau
 
 - If you use the Dockerfile build, the gateway binds to `lan` by default. The Docker Compose file binds to `loopback`.
 - Ensure the gateway token is set before starting the service.
+
+## Troubleshooting
+
+### Control UI Requires HTTPS or localhost
+> disconnected (1008): control ui requires HTTPS or localhost (secure context)
+Fix:
+```
+Open the Control UI from either:
+- http://localhost:<port>
+- https://<your-domain>
+
+Note: non-localhost HTTP URLs (ex: http://192.168.x.x) are not considered a secure context.
+```
+
+### Unauthorized: gateway token mismatch
+> disconnected (1008): unauthorized: gateway token mismatch (open a tokenized dashboard URL or paste token in Control UI settings)
+
+Fix:
+```
+This means the Control UI is using a different token than the running gateway.
+
+Fix options:
+- Open the tokenized dashboard URL (recommended):
+  http://localhost:18789/?token=<your-token>
+- Or paste the correct token in: Control UI → Config → Gateway → Gateway Token
+
+Then restart the gateway with the same token:
+  export MOLTBOT_GATEWAY_TOKEN="<your-token>"
+```
+
+### Pairing Required
+> disconnected (1008): pairing required
+
+Fix:
+```
+List pending device requests:
+  clawdbot devices list
+
+Approve a pending request:
+  clawdbot devices approve <PENDING_REQUEST_ID>
+```
