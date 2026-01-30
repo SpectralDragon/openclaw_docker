@@ -1,13 +1,19 @@
 services:
   moltbot:
-    image: khal3d/moltbot:latest
+    build: .
+    image: moltbot:local
     container_name: moltbot
+    init: true
+    shm_size: "2g"
     ports:
       - "${MOLTBOT_GATEWAY_PORT:-18789}:18789"
       - "${MOLTBOT_BRIDGE_PORT:-18790}:18790"
     volumes:
       - ./data/moltbot-config:/root/.clawdbot
       - ./data/moltbot-workspace:/root/clawd
+      # Persisted package manager binaries (brew, npm, go, python)
+      - moltbot-brew:/home/linuxbrew/.linuxbrew
+      - moltbot-tools:/tools
     healthcheck:
       test: [ "CMD", "clawdbot", "health" ]
       interval: 30s
@@ -17,3 +23,7 @@ services:
     environment:
       CLAWDBOT_GATEWAY_TOKEN: ${MOLTBOT_GATEWAY_TOKEN}
     restart: unless-stopped
+
+volumes:
+  moltbot-brew:
+  moltbot-tools:
