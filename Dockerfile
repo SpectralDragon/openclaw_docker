@@ -45,14 +45,14 @@ ENV PYTHONUSERBASE=${TOOLS_DIR}/python
 
 # Install npm tools to /tools/npm (persisted via volume)
 RUN npm config set prefix ${TOOLS_DIR}/npm \
-    && npm install -g clawdbot@latest clawdhub mcporter @steipete/summarize playwright
+    && npm install -g openclaw@latest clawdhub mcporter @steipete/summarize playwright
 
 # Declare volumes for persistence (brew, npm, go, python binaries + app data)
-VOLUME ["/home/linuxbrew/.linuxbrew", "/tools", "/root/.clawdbot", "/root/clawdbot", "/root/clawd"]
+VOLUME ["/home/linuxbrew/.linuxbrew", "/tools", "/root/.openclaw", "/root/openclaw", "/root/openclaw", "/root/.gitcfg", "/root/.cache", "/root/.config"]
 
 # Clawdbot host UI port
 EXPOSE 18789
 EXPOSE 18791
 
 # Start the Gateway (MoltBot's long-running service)
-CMD ["clawdbot", "gateway", "--allow-unconfigured", "--bind", "lan"]
+CMD ["sh", "-c", "cp ~/.gitcfg/.gitconfig ~/.gitconfig 2>/dev/null || true && openclaw gateway --allow-unconfigured --bind lan"]

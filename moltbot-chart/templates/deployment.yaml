@@ -46,13 +46,13 @@ spec:
               protocol: TCP
           env:
             {{- if .Values.gateway.tokenSecret.existingSecret }}
-            - name: CLAWDBOT_GATEWAY_TOKEN
+            - name: OPENCLAW_GATEWAY_TOKEN
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.gateway.tokenSecret.existingSecret }}
                   key: {{ .Values.gateway.tokenSecret.key }}
             {{- else if .Values.gateway.tokenSecret.value }}
-            - name: CLAWDBOT_GATEWAY_TOKEN
+            - name: OPENCLAW_GATEWAY_TOKEN
               valueFrom:
                 secretKeyRef:
                   name: {{ include "moltbot-chart.fullname" . }}-gateway-token
@@ -62,7 +62,7 @@ spec:
           livenessProbe:
             exec:
               command:
-                - clawdbot
+                - openclaw
                 - health
             initialDelaySeconds: 20
             periodSeconds: 30
@@ -71,7 +71,7 @@ spec:
           readinessProbe:
             exec:
               command:
-                - clawdbot
+                - openclaw
                 - health
             initialDelaySeconds: 10
             periodSeconds: 15
@@ -80,7 +80,7 @@ spec:
           startupProbe:
             exec:
               command:
-                - clawdbot
+                - openclaw
                 - health
             periodSeconds: 10
             timeoutSeconds: 5
@@ -88,9 +88,9 @@ spec:
           {{- end }}
           volumeMounts:
             - name: config
-              mountPath: /root/.clawdbot
+              mountPath: /root/.openclaw
             - name: workspace
-              mountPath: /root/clawdbot
+              mountPath: /root/openclaw
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:

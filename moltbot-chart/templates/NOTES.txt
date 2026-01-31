@@ -31,4 +31,4 @@
 {{- end }}
 
 3. Run initial setup inside the container (first-time only):
-   kubectl exec -it deploy/{{ include "moltbot-chart.fullname" . }} -- clawdbot setup
+   kubectl exec -it deploy/{{ include "moltbot-chart.fullname" . }} -- openclaw setup

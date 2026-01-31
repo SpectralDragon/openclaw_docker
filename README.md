@@ -4,7 +4,7 @@ This repository packages everything you need to run **MoltBot** locally with Doc
 
 ## Contents
 
-- `Dockerfile` — builds a lightweight image that installs the `clawdbot` CLI and runs the gateway service.
+- `Dockerfile` — builds a lightweight image that installs the `openclaw` CLI and runs the gateway service.
 - `docker-compose.yaml` — starts the service locally with persistent volumes and health checks.
 
 ## Docker
@@ -21,9 +21,9 @@ docker build -t moltbot:local .
 docker run -it --rm \
   -p 18789:18789 \
   -p 18791:18791 \
-  -e CLAWDBOT_GATEWAY_TOKEN="<token>" \
-  -v "$(pwd)/data/moltbot-config:/root/.clawdbot" \
-  -v "$(pwd)/data/moltbot-workspace:/root/clawd" \
+  -e OPENCLAW_GATEWAY_TOKEN="<token>" \
+  -v "$(pwd)/data/moltbot-config:/root/.openclaw" \
+  -v "$(pwd)/data/moltbot-workspace:/root/openclaw" \
   moltbot:local
 ```
 
@@ -62,13 +62,13 @@ To reuse an existing Secret instead of embedding the token in values:
 ```bash
 helm install moltbot ./moltbot-chart \
   --set gateway.tokenSecret.existingSecret="moltbot-gateway-token" \
-  --set gateway.tokenSecret.key="CLAWDBOT_GATEWAY_TOKEN"
+  --set gateway.tokenSecret.key="OPENCLAW_GATEWAY_TOKEN"
 ```
 
 Once the pod is running, execute the one-time setup inside the container:
 
 ```bash
-kubectl exec -it deploy/moltbot -- clawdbot setup
+kubectl exec -it deploy/moltbot -- openclaw setup
 ```
 
 To access the UI locally, port-forward the gateway service port:
@@ -117,8 +117,8 @@ Then restart the gateway with the same token:
 Fix:
 ```
 List pending device requests:
-  clawdbot devices list
+  openclaw devices list
 
 Approve a pending request:
-  clawdbot devices approve <PENDING_REQUEST_ID>
+  openclaw devices approve <PENDING_REQUEST_ID>
 ```

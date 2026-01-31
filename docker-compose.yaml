@@ -9,21 +9,29 @@ services:
       - "${MOLTBOT_GATEWAY_PORT:-18789}:18789"
       - "${MOLTBOT_BRIDGE_PORT:-18790}:18790"
     volumes:
-      - ./data/moltbot-config:/root/.clawdbot
-      - ./data/moltbot-workspace:/root/clawd
+      - ./data/moltbot-config:/root/.openclaw
+      - ./data/moltbot-workspace:/root/openclaw
       # Persisted package manager binaries (brew, npm, go, python)
       - moltbot-brew:/home/linuxbrew/.linuxbrew
       - moltbot-tools:/tools
+      # User config and cache
+      - moltbot-gitcfg:/root/.gitcfg
+      - moltbot-cache:/root/.cache
+      - moltbot-config:/root/.config
+
     healthcheck:
-      test: [ "CMD", "clawdbot", "health" ]
+      test: [ "CMD", "openclaw", "health" ]
       interval: 30s
       timeout: 5s
       retries: 5
       start_period: 20s
     environment:
-      CLAWDBOT_GATEWAY_TOKEN: ${MOLTBOT_GATEWAY_TOKEN}
+      OPENCLAW_GATEWAY_TOKEN: ${MOLTBOT_GATEWAY_TOKEN}
     restart: unless-stopped
 
 volumes:
   moltbot-brew:
   moltbot-tools:
+  moltbot-gitcfg:
+  moltbot-cache:
+  moltbot-config:
