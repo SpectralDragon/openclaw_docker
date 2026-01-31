@@ -43,9 +43,12 @@ ENV GOPATH=${TOOLS_DIR}/go
 ENV GOBIN=${TOOLS_DIR}/go/bin
 ENV PYTHONUSERBASE=${TOOLS_DIR}/python
 
-# Install npm tools to /tools/npm (persisted via volume)
+# Install openclaw to default location (always available, not in volume)
+RUN npm install -g openclaw@latest
+
+# Install other npm tools to /tools/npm (persisted via volume)
 RUN npm config set prefix ${TOOLS_DIR}/npm \
-    && npm install -g openclaw@latest clawdhub mcporter @steipete/summarize playwright
+    && npm install -g clawdhub mcporter @steipete/summarize playwright
 
 # Declare volumes for persistence (brew, npm, go, python binaries + app data)
 VOLUME ["/home/linuxbrew/.linuxbrew", "/tools", "/root/.openclaw", "/root/openclaw", "/root/openclaw", "/root/.gitcfg", "/root/.cache", "/root/.config"]
