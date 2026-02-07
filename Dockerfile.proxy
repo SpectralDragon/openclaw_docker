@@ -1,0 +1,13 @@
+FROM ghcr.io/xtls/xray-core:latest AS xray-bin
+
+FROM alpine:3.19
+
+RUN apk add --no-cache iptables ip6tables ca-certificates su-exec gettext \
+    && adduser -S -H -D -u 10001 xray
+
+COPY --from=xray-bin /usr/local/bin/xray /usr/local/bin/xray
+
+COPY proxy-entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]

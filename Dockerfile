@@ -30,8 +30,11 @@ RUN curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.s
     && NONINTERACTIVE=1 /bin/bash /tmp/brew-install.sh \
     && rm /tmp/brew-install.sh \
     && eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)" \
+    && brew install gh himalaya
+
+RUN eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)" \
     && brew tap yakitrak/yakitrak \
-    && brew install gh himalaya yakitrak/yakitrak/obs
+    && brew install yakitrak/yakitrak/obs
 
 # Back to root, add Homebrew and tools to PATH
 USER root

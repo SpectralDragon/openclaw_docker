@@ -1,13 +1,38 @@
 services:
-  moltbot:
-    build: .
-    image: moltbot:local
-    container_name: moltbot
-    init: true
-    shm_size: "2g"
+
+  xray-proxy:
+    build:
+      context: .
+      dockerfile: Dockerfile.proxy
+    container_name: xray-proxy
+    restart: always
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - ./proxy-config.json:/etc/xray/config.template.json:ro
+    environment:
+      VLESS_ADDRESS: ${VLESS_ADDRESS}
+      VLESS_PORT: ${VLESS_PORT}
+      VLESS_UUID: ${VLESS_UUID}
+      VLESS_PUBLIC_KEY: ${VLESS_PUBLIC_KEY}
+      VLESS_SHORT_ID: ${VLESS_SHORT_ID}
+      VLESS_SNI: ${VLESS_SNI:-google.com}
+      VLESS_FINGERPRINT: ${VLESS_FINGERPRINT:-chrome}
+      VLESS_SPIDER_X: ${VLESS_SPIDER_X:-/}
     ports:
       - "${MOLTBOT_GATEWAY_PORT:-18789}:18789"
       - "${MOLTBOT_BRIDGE_PORT:-18790}:18790"
+
+  openclaw:
+    build: .
+    image: openclaw:0.1.0
+    container_name: openclaw
+    init: true
+    shm_size: "2g"
+    network_mode: "service:xray-proxy"
+    depends_on:
+      xray-proxy:
+        condition: service_started
     volumes:
       - ./data/moltbot-config:/root/.openclaw
       - ./data/moltbot-workspace:/root/openclaw
