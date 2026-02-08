@@ -1,13 +1,12 @@
 services:
-  moltbot:
+  openclaw:
     build: .
-    image: moltbot:local
-    container_name: moltbot
+    image: openclaw:0.2.0
+    container_name: openclaw
     init: true
     shm_size: "2g"
-    ports:
-      - "${MOLTBOT_GATEWAY_PORT:-18789}:18789"
-      - "${MOLTBOT_BRIDGE_PORT:-18790}:18790"
+    cap_add:
+      - NET_ADMIN
     volumes:
       - ./data/moltbot-config:/root/.openclaw
       - ./data/moltbot-workspace:/root/openclaw
@@ -18,6 +17,10 @@ services:
       - moltbot-gitcfg:/root/.gitcfg
       - moltbot-cache:/root/.cache
       - moltbot-config:/root/.config
+      - moltbot-ssh:/root/.ssh
+
+    ports:
+      - "2222:22"
 
     healthcheck:
       test: [ "CMD", "openclaw", "health" ]
@@ -27,6 +30,11 @@ services:
       start_period: 20s
     environment:
       OPENCLAW_GATEWAY_TOKEN: ${MOLTBOT_GATEWAY_TOKEN}
+      # Redsocks: started on boot when REDSOCKS_PROXY_IP is set (local proxy on REDSOCKS_LOCAL_PORT)
+      REDSOCKS_PROXY_IP: ${REDSOCKS_PROXY_IP:-}
+      REDSOCKS_PROXY_PORT: ${REDSOCKS_PROXY_PORT:-1080}
+      REDSOCKS_PROXY_TYPE: ${REDSOCKS_PROXY_TYPE:-socks5}
+      REDSOCKS_LOCAL_PORT: ${REDSOCKS_LOCAL_PORT:-12345}
     restart: unless-stopped
 
 volumes:
@@ -35,3 +43,4 @@ volumes:
   moltbot-gitcfg:
   moltbot-cache:
   moltbot-config:
+  moltbot-ssh:

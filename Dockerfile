@@ -4,13 +4,17 @@ FROM node:22-slim
 ENV TOOLS_DIR=/tools
 ENV PATH="${TOOLS_DIR}/npm/bin:${TOOLS_DIR}/go/bin:${TOOLS_DIR}/python/bin:${PATH}"
 
-# System deps + vim + Python + Homebrew deps + headless Chromium for automation
+# System deps + vim + Python + Homebrew deps + headless Chromium + redsocks for proxy
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         bash ca-certificates curl git vim \
         python3 python3-pip \
         build-essential file procps \
         chromium chromium-sandbox \
+        redsocks \
+        iptables \
+        openssh-server \
+        openssh-client \
     && rm -rf /var/lib/apt/lists/*
 
 # Symlink python -> python3, pip -> pip3 for convenience
@@ -50,12 +54,29 @@ RUN npm install -g openclaw@latest
 RUN npm config set prefix ${TOOLS_DIR}/npm \
     && npm install -g clawdhub mcporter @steipete/summarize playwright
 
-# Declare volumes for persistence (brew, npm, go, python binaries + app data)
-VOLUME ["/home/linuxbrew/.linuxbrew", "/tools", "/root/.openclaw", "/root/openclaw", "/root/openclaw", "/root/.gitcfg", "/root/.cache", "/root/.config"]
+# SSH: allow root login by key only, generate host keys
+RUN ssh-keygen -A \
+    && mkdir -p /etc/ssh/sshd_config.d \
+    && echo "PermitRootLogin prohibit-password" > /etc/ssh/sshd_config.d/99-root.conf
 
-# Clawdbot host UI port
+# Replace apt-get with a stub so OpenClaw bot gets a clear error and uses brew instead
+RUN echo '#!/bin/sh' > /usr/bin/apt-get \
+    && echo "echo \"'apt-get' not available, please use 'brew install' instead\" >&2" >> /usr/bin/apt-get \
+    && echo 'exit 1' >> /usr/bin/apt-get \
+    && chmod +x /usr/bin/apt-get
+
+# Entrypoint: optional redsocks on startup, sshd, then exec CMD
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
+
+# Declare volumes for persistence (brew, npm, go, python binaries + app data)
+VOLUME ["/home/linuxbrew/.linuxbrew", "/tools", "/root/.openclaw", "/root/openclaw", "/root/openclaw", "/root/.gitcfg", "/root/.cache", "/root/.config", "/root/.ssh"]
+
+# Clawdbot host UI port, SSH
 EXPOSE 18789
 EXPOSE 18791
+EXPOSE 22
 
 # Start the Gateway (MoltBot's long-running service)
-CMD ["sh", "-c", "cp ~/.gitcfg/.gitconfig ~/.gitconfig 2>/dev/null || true && openclaw gateway --allow-unconfigured --bind lan"]
+CMD ["openclaw", "gateway", "--allow-unconfigured", "--bind", "lan"]
