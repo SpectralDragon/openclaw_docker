@@ -15,6 +15,7 @@ RUN apt-get update \
         iptables \
         openssh-server \
         openssh-client \
+        docker.io \
     && rm -rf /var/lib/apt/lists/*
 
 # Symlink python -> python3, pip -> pip3 for convenience

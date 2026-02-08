@@ -18,6 +18,7 @@ services:
       - moltbot-cache:/root/.cache
       - moltbot-config:/root/.config
       - moltbot-ssh:/root/.ssh
+      - /var/run/docker.sock:/var/run/docker.sock
 
     ports:
       - "2222:22"
