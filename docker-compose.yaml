@@ -1,7 +1,7 @@
 services:
   openclaw:
     build: .
-    image: openclaw:0.2.0
+    image: openclaw:0.2.1
     container_name: openclaw
     init: true
     shm_size: "2g"
