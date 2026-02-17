@@ -41,6 +41,15 @@ EOF
     iptables -t nat -N REDSOCKS 2>/dev/null || iptables -t nat -F REDSOCKS
     iptables -t nat -A REDSOCKS -d 127.0.0.0/8 -p tcp -j RETURN
     iptables -t nat -A REDSOCKS -d "${PROXY_IP}" -p tcp -j RETURN
+    
+    # Exclude additional subnets from redsocks (Docker networks, LAN, private networks)
+    if [ -n "${REDSOCKS_EXCLUDE_SUBNETS}" ]; then
+        echo "${REDSOCKS_EXCLUDE_SUBNETS}" | tr ',' '\n' | while read -r subnet; do
+            subnet=$(echo "${subnet}" | xargs)  # trim whitespace
+            [ -n "${subnet}" ] && iptables -t nat -A REDSOCKS -d "${subnet}" -p tcp -j RETURN
+        done
+    fi
+    
     iptables -t nat -A REDSOCKS -p tcp -j REDIRECT --to-ports "${REDSOCKS_LOCAL_PORT}"
     iptables -t nat -C OUTPUT -p tcp -j REDSOCKS 2>/dev/null || iptables -t nat -A OUTPUT -p tcp -j REDSOCKS
 fi
@@ -50,12 +59,16 @@ mkdir -p /root/.ssh
 chmod 700 /root/.ssh
 [ -f /root/.ssh/authorized_keys ] && chmod 600 /root/.ssh/authorized_keys
 
-# Start SSH server (ssh-keygen, ssh available; connect with ssh -p 2222 root@localhost)
+# Start SSH server (ssh-keygen, ssh available; connect with ssh -p 44 root@localhost)
 mkdir -p /run/sshd
-echo "Starting sshd on port 22"
+echo "Starting sshd on port 44"
 /usr/sbin/sshd
 
 # Copy gitconfig from persisted volume if present
 cp ~/.gitcfg/.gitconfig ~/.gitconfig 2>/dev/null || true
+
+# Set git user from env if provided
+[ -n "${GIT_USER_NAME}" ] && git config --global user.name "${GIT_USER_NAME}"
+[ -n "${GIT_EMAIL_NAME}" ] && git config --global user.email "${GIT_EMAIL_NAME}"
 
 exec "$@"

@@ -55,10 +55,11 @@ RUN npm install -g openclaw@latest
 RUN npm config set prefix ${TOOLS_DIR}/npm \
     && npm install -g clawdhub mcporter @steipete/summarize playwright
 
-# SSH: allow root login by key only, generate host keys
+# SSH: allow root login by key only, generate host keys, use port 44
 RUN ssh-keygen -A \
     && mkdir -p /etc/ssh/sshd_config.d \
-    && echo "PermitRootLogin prohibit-password" > /etc/ssh/sshd_config.d/99-root.conf
+    && echo "PermitRootLogin prohibit-password" > /etc/ssh/sshd_config.d/99-root.conf \
+    && echo "Port 44" > /etc/ssh/sshd_config.d/99-port.conf
 
 # Replace apt-get with a stub so OpenClaw bot gets a clear error and uses brew instead
 RUN echo '#!/bin/sh' > /usr/bin/apt-get \
@@ -77,7 +78,7 @@ VOLUME ["/home/linuxbrew/.linuxbrew", "/tools", "/root/.openclaw", "/root/opencl
 # Clawdbot host UI port, SSH
 EXPOSE 18789
 EXPOSE 18791
-EXPOSE 22
+EXPOSE 44
 
 # Start the Gateway (MoltBot's long-running service)
 CMD ["openclaw", "gateway", "--allow-unconfigured", "--bind", "lan"]

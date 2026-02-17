@@ -1,10 +1,11 @@
 services:
   openclaw:
     build: .
-    image: openclaw:0.2.1
+    image: openclaw:0.2.3
     container_name: openclaw
     init: true
     shm_size: "2g"
+    network_mode: host
     cap_add:
       - NET_ADMIN
     volumes:
@@ -20,8 +21,8 @@ services:
       - moltbot-ssh:/root/.ssh
       - /var/run/docker.sock:/var/run/docker.sock
 
-    ports:
-      - "2222:22"
+    # Ports mapping not needed in host network mode
+    # SSH is accessible on host port 44 directly
 
     healthcheck:
       test: [ "CMD", "openclaw", "health" ]
@@ -36,6 +37,11 @@ services:
       REDSOCKS_PROXY_PORT: ${REDSOCKS_PROXY_PORT:-1080}
       REDSOCKS_PROXY_TYPE: ${REDSOCKS_PROXY_TYPE:-socks5}
       REDSOCKS_LOCAL_PORT: ${REDSOCKS_LOCAL_PORT:-12345}
+      # Exclude subnets from redsocks proxy (comma-separated CIDR notation, e.g., "172.16.0.0/12,192.168.0.0/16")
+      REDSOCKS_EXCLUDE_SUBNETS: ${REDSOCKS_EXCLUDE_SUBNETS:-172.16.0.0/12,192.168.0.0/16,10.0.0.0/8}
+      # Git config (applied on startup)
+      GIT_USER_NAME: ${GIT_USER_NAME:-}
+      GIT_EMAIL_NAME: ${GIT_EMAIL_NAME:-}
     restart: unless-stopped
 
 volumes:
