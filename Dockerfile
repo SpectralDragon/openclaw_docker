@@ -49,7 +49,7 @@ ENV GOBIN=${TOOLS_DIR}/go/bin
 ENV PYTHONUSERBASE=${TOOLS_DIR}/python
 
 # Install openclaw to default location (always available, not in volume)
-RUN npm install -g openclaw@latest
+RUN npm install -g openclaw@2026.2.22
 
 # Install other npm tools to /tools/npm (persisted via volume)
 RUN npm config set prefix ${TOOLS_DIR}/npm \

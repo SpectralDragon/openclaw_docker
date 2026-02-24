@@ -1,7 +1,7 @@
 services:
   openclaw:
     build: .
-    image: openclaw:0.2.3
+    image: openclaw:0.2.5
     container_name: openclaw
     init: true
     shm_size: "2g"
@@ -10,7 +10,6 @@ services:
       - NET_ADMIN
     volumes:
       - ./data/moltbot-config:/root/.openclaw
-      - ./data/moltbot-workspace:/root/openclaw
       # Persisted package manager binaries (brew, npm, go, python)
       - moltbot-brew:/home/linuxbrew/.linuxbrew
       - moltbot-tools:/tools
